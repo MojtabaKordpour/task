@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0.30
+    container_name: mysql_task
+    restart: always
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: task
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - '33060:3306'
+    networks:
+      - laravel_task
+
+  web:
+    build:
+      context: .
+    container_name: web_task
+    ports:
+        - '80:80'
+    volumes:
+      - ./core:/var/www/app
+      - ./apache/default.conf:/etc/apache2/sites-enabled/000-default.conf
+      - ./apache/apache2.conf:/etc/apache2/apache2.conf
+      - ./supervisor-data:/etc/supervisor/conf.d
+    depends_on:
+      - mysql
+    networks:
+      - laravel_task
+
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin:5
+    container_name: phpmyadmin_task
+    restart: always
+    ports:
+      - '8001:80'
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: 123 
+    networks:
+      - laravel_task
+
+  redis:
+      image: redis:latest
+      container_name: redis_task
+      ports:
+        - "6379:6379"
+      volumes:
+        - ./redis-data:/data
+      networks:
+        - laravel_task
+  
+
+networks:
+  laravel_task:

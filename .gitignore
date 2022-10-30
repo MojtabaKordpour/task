@@ -1,0 +1,5 @@
+/mysql-data
+/redis-data
+/.idea
+/.vscode
+.DS_Store
